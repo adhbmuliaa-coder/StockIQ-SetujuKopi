@@ -1,0 +1,40 @@
+{% extends "dashboard.html" %}
+{% block title %}Kelola Cabang — StockIQ{% endblock %}
+{% block page_title %}🏪 Kelola Cabang{% endblock %}
+
+{% block content %}
+<div class="admin-grid fade-in">
+  <div class="form-card">
+    <h2>➕ Tambah Cabang</h2>
+    <form method="POST" action="{{ url_for('admin.add_branch') }}">
+      <div class="form-group">
+        <label for="name">Nama Cabang</label>
+        <input type="text" id="name" name="name" class="form-control"
+               placeholder="Contoh: CABANG BARU" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="addBranchBtn">Tambah Cabang</button>
+    </form>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-header"><h3>Daftar Cabang</h3></div>
+    <table>
+      <thead><tr><th>ID</th><th>Nama</th><th>Aksi</th></tr></thead>
+      <tbody>
+        {% for b in branches %}
+        <tr>
+          <td>{{ b.id }}</td>
+          <td style="font-weight:500;color:var(--text-primary);">{{ b.name }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.delete_branch', branch_id=b.id) }}" style="display:inline;"
+                  onsubmit="return confirm('Hapus cabang {{ b.name }}?')">
+              <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

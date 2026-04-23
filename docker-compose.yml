@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: stockiq_web
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount instance folder agar database SQLite aman & persistent
+      - ./instance:/app/instance
+    env_file:
+      - .env

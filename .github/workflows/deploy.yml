@@ -1,0 +1,24 @@
+name: Auto Deploy to Oracle Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Execute Deploy Script on Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ORACLE_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          script: |
+            cd /var/www/stockiq
+            bash deploy.sh

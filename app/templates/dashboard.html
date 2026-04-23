@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — StockIQ{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-area">
+      <img src="{{ url_for('static', filename='img/logo_app.png') }}" alt="StockIQ" class="sidebar-logo">
+      <h2>StockIQ</h2>
+      <small>Setuju Kopi</small>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Menu Utama</div>
+        <a href="{{ url_for('dashboard.index') }}" class="nav-link active">
+          <span class="icon">🍽️</span> Dashboard
+        </a>
+        <a href="{{ url_for('barang_masuk.index') }}" class="nav-link">
+          <span class="icon">🛒</span> Barang Masuk
+        </a>
+        <a href="{{ url_for('transfer.index') }}" class="nav-link">
+          <span class="icon">🚚</span> Transfer Keluar
+        </a>
+        <a href="{{ url_for('prepare.index') }}" class="nav-link">
+          <span class="icon">🍳</span> Prepare
+        </a>
+        <a href="{{ url_for('npu.index') }}" class="nav-link">
+          <span class="icon">♻️</span> NPU
+        </a>
+        <a href="{{ url_for('kejadian.index') }}" class="nav-link">
+          <span class="icon">📝</span> Kejadian
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Data</div>
+        <a href="{{ url_for('txn.riwayat') }}" class="nav-link">
+          <span class="icon">📋</span> Riwayat
+        </a>
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('txn.export_excel') }}" class="nav-link">
+          <span class="icon">📥</span> Export Excel
+        </a>
+        {% endif %}
+      </div>
+      {% if current_user.is_admin() %}
+      <div class="nav-section">
+        <div class="nav-label">Admin</div>
+        <a href="{{ url_for('admin.users') }}" class="nav-link">
+          <span class="icon">👥</span> Users
+        </a>
+        <a href="{{ url_for('admin.branches') }}" class="nav-link">
+          <span class="icon">🏬</span> Cabang
+        </a>
+        <a href="{{ url_for('admin.master_data') }}" class="nav-link">
+          <span class="icon">📦</span> Master Data
+        </a>
+      </div>
+      {% endif %}
+      <div class="nav-section">
+        <a href="{{ url_for('admin.profile') }}" class="nav-link">
+          <span class="icon">⚙️</span> Profil
+        </a>
+        <a href="{{ url_for('auth.select_branch') }}" class="nav-link">
+          <span class="icon">🔀</span> Ganti Cabang
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link">
+          <span class="icon">🚪</span> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar">{{ current_user.username[0]|upper }}</div>
+        <div>
+          <div class="user-name">{{ current_user.username }}</div>
+          <div class="user-role">{{ current_user.role|upper }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <span class="page-title">{% block page_title %}🍽️ Dashboard{% endblock %}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="live-clock" id="liveClock"></div>
+        <div class="branch-badge">
+          <span class="dot"></span>
+          {{ branch_name }}
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area fade-in">
+      {% block content %}
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <a href="{{ url_for('barang_masuk.index') }}" class="stat-card" id="cardBarangMasuk">
+          <div class="accent-bar blue"></div>
+          <div class="card-icon blue">🛒</div>
+          <div class="card-label">Barang Masuk</div>
+          <div class="card-value">{{ counts.masuk }}</div>
+          <div class="card-desc">Transaksi hari ini</div>
+        </a>
+        <a href="{{ url_for('transfer.index') }}" class="stat-card" id="cardTransfer">
+          <div class="accent-bar orange"></div>
+          <div class="card-icon orange">🚚</div>
+          <div class="card-label">Transfer Keluar</div>
+          <div class="card-value">{{ counts.transfer }}</div>
+          <div class="card-desc">Transaksi hari ini</div>
+        </a>
+        <a href="{{ url_for('prepare.index') }}" class="stat-card" id="cardPrepare">
+          <div class="accent-bar green"></div>
+          <div class="card-icon green">🍳</div>
+          <div class="card-label">Prepare</div>
+          <div class="card-value">{{ counts.prepare }}</div>
+          <div class="card-desc">Transaksi hari ini</div>
+        </a>
+        <a href="{{ url_for('prepare.index') }}" class="stat-card" id="cardPrepareIn">
+          <div class="accent-bar" style="background:linear-gradient(135deg,#1dd1a1,#0fa958);"></div>
+          <div class="card-icon" style="background:rgba(29,209,161,0.12);color:#1dd1a1;">📥</div>
+          <div class="card-label">Prepare In</div>
+          <div class="card-value">{{ counts.prepare_in }}</div>
+          <div class="card-desc">Hasil jadi hari ini</div>
+        </a>
+        <a href="{{ url_for('npu.index') }}" class="stat-card" id="cardNpu">
+          <div class="accent-bar red"></div>
+          <div class="card-icon red">♻️</div>
+          <div class="card-label">NPU</div>
+          <div class="card-value">{{ counts.npu }}</div>
+          <div class="card-desc">Transaksi hari ini</div>
+        </a>
+        <a href="{{ url_for('kejadian.index') }}" class="stat-card" id="cardKejadian">
+          <div class="accent-bar purple"></div>
+          <div class="card-icon purple">📝</div>
+          <div class="card-label">Kejadian</div>
+          <div class="card-value">{{ counts.kejadian }}</div>
+          <div class="card-desc">Laporan hari ini</div>
+        </a>
+      </div>
+
+      <!-- Transaction Log -->
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h3>📋 Log Transaksi Hari Ini</h3>
+          <a href="{{ url_for('txn.riwayat') }}" class="btn btn-ghost btn-sm">Lihat Semua</a>
+        </div>
+        {% if transactions %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Tipe</th>
+                <th>Divisi</th>
+                <th>Nama Bahan</th>
+                <th>Qty</th>
+                <th>Satuan</th>
+                <th>Tanggal</th>
+                <th>User</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for txn in transactions %}
+              <tr>
+                <td>{{ txn.created_at.strftime('%H:%M') }}</td>
+                <td><span class="badge badge-{{ txn.type }}">{{ txn.type }}</span></td>
+                <td>{{ txn.divisi }}</td>
+                <td style="color:var(--text-primary);font-weight:500;">{{ txn.nama_bahan }}</td>
+                <td style="font-weight:600;">{% if txn.type != 'kejadian' %}{{ txn.qty }}{% else %}-{% endif %}</td>
+                <td>{% if txn.type != 'kejadian' %}{{ txn.satuan }}{% else %}-{% endif %}</td>
+                <td>{% if txn.transaction_date %}{{ txn.transaction_date.strftime('%d/%m/%Y') }}{% else %}-{% endif %}</td>
+                <td>{{ txn.user.username }}</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <a href="{{ url_for('txn.edit', txn_id=txn.id) }}" class="btn btn-ghost btn-sm" title="Edit">✏️</a>
+                    <form method="POST" action="{{ url_for('txn.delete', txn_id=txn.id) }}" style="display:inline;"
+                          onsubmit="return confirm('Hapus transaksi ini?')">
+                      <button type="submit" class="btn btn-danger btn-sm" title="Hapus">🗑️</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="icon">🍵</div>
+          <p>Belum ada transaksi hari ini</p>
+        </div>
+        {% endif %}
+      </div>
+      {% endblock %}
+    </div>
+  </main>
+</div>
+
+<!-- Floating Calculator -->
+<button class="calc-toggle" id="calcToggle" title="Kalkulator">🧮</button>
+<div class="calculator-widget" id="calculatorWidget">
+  <div class="calc-header">
+    <span>🧮 Kalkulator</span>
+    <button class="calc-close" id="calcClose">✕</button>
+  </div>
+  <input type="text" class="calc-display" id="calcDisplay" readonly>
+  <div class="calc-buttons">
+    <button class="calc-btn calc-fn" onclick="calcClear()">C</button>
+    <button class="calc-btn calc-fn" onclick="calcBackspace()">⌫</button>
+    <button class="calc-btn calc-fn" onclick="calcInput('%')">%</button>
+    <button class="calc-btn calc-op" onclick="calcInput('/')">÷</button>
+    <button class="calc-btn" onclick="calcInput('7')">7</button>
+    <button class="calc-btn" onclick="calcInput('8')">8</button>
+    <button class="calc-btn" onclick="calcInput('9')">9</button>
+    <button class="calc-btn calc-op" onclick="calcInput('*')">×</button>
+    <button class="calc-btn" onclick="calcInput('4')">4</button>
+    <button class="calc-btn" onclick="calcInput('5')">5</button>
+    <button class="calc-btn" onclick="calcInput('6')">6</button>
+    <button class="calc-btn calc-op" onclick="calcInput('-')">−</button>
+    <button class="calc-btn" onclick="calcInput('1')">1</button>
+    <button class="calc-btn" onclick="calcInput('2')">2</button>
+    <button class="calc-btn" onclick="calcInput('3')">3</button>
+    <button class="calc-btn calc-op" onclick="calcInput('+')">+</button>
+    <button class="calc-btn calc-zero" onclick="calcInput('0')">0</button>
+    <button class="calc-btn" onclick="calcInput('.')">.</button>
+    <button class="calc-btn calc-eq" onclick="calcEval()">=</button>
+  </div>
+</div>
+
+<!-- Global Confirm Modal -->
+<div class="custom-modal" id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+  <div class="modal-content fade-in" style="background:var(--bg-card); padding:24px; border-radius:var(--radius-md); max-width:400px; width:90%; border:1px solid var(--border-color); box-shadow:var(--shadow-lg);">
+    <h3 style="margin-bottom:12px; color:var(--accent-red);">⚠️ Konfirmasi Hapus</h3>
+    <p id="confirmMessage" style="color:var(--text-secondary); margin-bottom:24px;">Apakah Anda yakin ingin menghapus data ini?</p>
+    <div style="display:flex;gap:12px;justify-content:flex-end;">
+      <button class="btn btn-ghost" id="confirmCancel" type="button">Batal</button>
+      <button class="btn btn-danger" id="confirmOk" type="button">Hapus</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

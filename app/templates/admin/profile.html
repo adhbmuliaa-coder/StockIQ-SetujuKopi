@@ -1,0 +1,59 @@
+{% extends "dashboard.html" %}
+{% block title %}Profil — StockIQ{% endblock %}
+{% block page_title %}⚙️ Profil{% endblock %}
+
+{% block content %}
+<div class="form-page fade-in">
+  <div class="form-card" style="max-width:500px;">
+    <h2>⚙️ Ubah Profil</h2>
+    <p class="form-subtitle">Ubah username atau password akun Anda</p>
+
+    <form method="POST" action="{{ url_for('admin.profile') }}">
+      <div class="form-group">
+        <label for="current_username">Username Saat Ini</label>
+        <input type="text" class="form-control" value="{{ current_user.username }}" readonly
+               style="opacity:0.6;">
+      </div>
+
+      <div class="form-group">
+        <label for="new_username">Username Baru</label>
+        <input type="text" id="new_username" name="new_username" class="form-control"
+               placeholder="Kosongkan jika tidak ingin mengubah" value="{{ current_user.username }}">
+      </div>
+
+      <div class="form-group">
+        <label for="new_password">Password Baru</label>
+        <div class="password-wrapper">
+          <input type="password" id="new_password" name="new_password" class="form-control"
+                 placeholder="Kosongkan jika tidak ingin mengubah">
+          <button type="button" class="password-toggle" id="toggleProfilePwd" title="Tampilkan">👁️</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button type="submit" class="btn btn-primary">💾 Simpan</button>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-ghost">Batal</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const toggleBtn = document.getElementById('toggleProfilePwd');
+  const pwdInput = document.getElementById('new_password');
+  if (toggleBtn && pwdInput) {
+    toggleBtn.addEventListener('click', () => {
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        toggleBtn.textContent = '🔒';
+        setTimeout(() => { pwdInput.type = 'password'; toggleBtn.textContent = '👁️'; }, 3000);
+      } else {
+        pwdInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+      }
+    });
+  }
+</script>
+{% endblock %}

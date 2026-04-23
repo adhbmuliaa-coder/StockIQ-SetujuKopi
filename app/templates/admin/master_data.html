@@ -1,0 +1,191 @@
+{% extends "dashboard.html" %}
+{% block title %}Master Data — StockIQ{% endblock %}
+{% block page_title %}📦 Master Data{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+
+  <!-- Tabs -->
+  <div class="admin-tabs" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+    <button class="btn btn-primary btn-sm tab-btn active" data-tab="tab-bahan">Bahan</button>
+    <button class="btn btn-ghost btn-sm tab-btn" data-tab="tab-npu">NPU</button>
+  </div>
+
+  <!-- Tab: Bahan -->
+  <div id="tab-bahan" class="tab-content">
+    <div class="admin-grid" style="margin-bottom:24px;">
+      <div class="form-card">
+        <h2>➕ Tambah Bahan</h2>
+        <form method="POST" action="{{ url_for('admin.add_bahan') }}" id="addBahanForm">
+          <div class="form-group">
+            <label for="divisi_bahan">Divisi</label>
+            <select id="divisi_bahan" name="divisi" class="form-control" required>
+              <option value="">-- Pilih Divisi --</option>
+              {% for d in divisi_list %}
+              <option value="{{ d }}">{{ d }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nama_bahan">Nama Bahan</label>
+            <input type="text" id="nama_bahan" name="nama_bahan" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="satuan_bahan_add">Satuan</label>
+            <input type="text" id="satuan_bahan_add" name="satuan" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="is_prepare" name="is_prepare" onchange="togglePrepareInput()">
+              <span>Bahan ini adalah Prepare?</span>
+            </label>
+          </div>
+          <div class="form-group" id="satuanPrepareGroup" style="display:none;">
+            <label for="satuan_prepare_add">Satuan Prepare</label>
+            <input type="text" id="satuan_prepare_add" name="satuan_prepare" class="form-control"
+                   placeholder="Contoh: LITER, BOTOL">
+          </div>
+          <div class="form-group">
+            <label>Cabang</label>
+            <div class="checkbox-grid">
+              {% for b in branches %}
+              <label><input type="checkbox" name="branch_ids" value="{{ b.id }}" checked> {{ b.name }}</label>
+              {% endfor %}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Tambah Bahan</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-header">
+        <h3>Daftar Bahan ({{ bahan_list|length }})</h3>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Divisi</th>
+              <th>Nama Bahan</th>
+              <th>Satuan</th>
+              <th>Prepare</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in bahan_list %}
+            <tr>
+              <td style="color:var(--text-muted);">{{ item.id }}</td>
+              <td>{{ item.divisi }}</td>
+              <td style="color:var(--text-primary);font-weight:500;">{{ item.nama_bahan }}</td>
+              <td>{{ item.satuan }}</td>
+              <td>
+                {% if item.prepare %}
+                <span class="badge badge-prepare">✓ Prepare</span>
+                {% else %}
+                <span style="color:var(--text-muted);">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="POST" action="{{ url_for('admin.delete_bahan', item_id=item.id) }}" style="display:inline;"
+                      onsubmit="return confirm('Hapus bahan ini?')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Hapus">🗑️</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: NPU -->
+  <div id="tab-npu" class="tab-content" style="display:none;">
+    <div class="admin-grid" style="margin-bottom:24px;">
+      <div class="form-card">
+        <h2>➕ Tambah Item NPU</h2>
+        <form method="POST" action="{{ url_for('admin.add_npu') }}">
+          <div class="form-group">
+            <label for="divisi_npu">Divisi</label>
+            <select id="divisi_npu" name="divisi" class="form-control" required>
+              <option value="">-- Pilih Divisi --</option>
+              {% for d in divisi_list %}
+              <option value="{{ d }}">{{ d }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nama_npu">Nama Item</label>
+            <input type="text" id="nama_npu" name="nama_bahan" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="satuan_npu_add">Satuan NPU</label>
+            <input type="text" id="satuan_npu_add" name="satuan_npu" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Cabang</label>
+            <div class="checkbox-grid">
+              {% for b in branches %}
+              <label><input type="checkbox" name="branch_ids" value="{{ b.id }}" checked> {{ b.name }}</label>
+              {% endfor %}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Tambah NPU</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-header"><h3>Daftar NPU ({{ npu_list|length }})</h3></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Divisi</th><th>Nama Item</th><th>Satuan</th><th>Aksi</th></tr>
+          </thead>
+          <tbody>
+            {% for item in npu_list %}
+            <tr>
+              <td style="color:var(--text-muted);">{{ item.id }}</td>
+              <td>{{ item.divisi }}</td>
+              <td style="color:var(--text-primary);font-weight:500;">{{ item.nama_bahan }}</td>
+              <td>{{ item.satuan_npu }}</td>
+              <td>
+                <form method="POST" action="{{ url_for('admin.delete_npu', item_id=item.id) }}" style="display:inline;"
+                      onsubmit="return confirm('Hapus NPU ini?')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Hapus">🗑️</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.className = b.className.replace('btn-primary', 'btn-ghost'); });
+      btn.classList.add('active');
+      btn.className = btn.className.replace('btn-ghost', 'btn-primary');
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      document.getElementById(btn.dataset.tab).style.display = 'block';
+    });
+  });
+
+  // Toggle prepare satuan input
+  function togglePrepareInput() {
+    const check = document.getElementById('is_prepare');
+    const group = document.getElementById('satuanPrepareGroup');
+    group.style.display = check.checked ? 'block' : 'none';
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "dashboard.html" %}
+{% block title %}Riwayat Transaksi — StockIQ{% endblock %}
+{% block page_title %}📋 Riwayat Transaksi{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+  <!-- Filters -->
+  <div class="form-card" style="margin-bottom:20px;">
+    <form method="GET" action="{{ url_for('txn.riwayat') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
+      
+      {% if current_user.is_admin() %}
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label for="filter_branch_id">Cabang</label>
+        <select id="filter_branch_id" name="branch_id" class="form-control">
+          <option value="">Semua Cabang</option>
+          {% for b in all_branches %}
+          <option value="{{ b.id }}" {% if filter_branch_id|string == b.id|string %}selected{% endif %}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label for="filter_type">Tipe Transaksi</label>
+        <select id="filter_type" name="type" class="form-control">
+          <option value="">Semua Tipe</option>
+          <option value="masuk" {% if filter_type=='masuk' %}selected{% endif %}>Barang Masuk</option>
+          <option value="transfer" {% if filter_type=='transfer' %}selected{% endif %}>Transfer</option>
+          <option value="prepare" {% if filter_type=='prepare' %}selected{% endif %}>Prepare</option>
+          <option value="prepare_in" {% if filter_type=='prepare_in' %}selected{% endif %}>Prepare In</option>
+          <option value="npu" {% if filter_type=='npu' %}selected{% endif %}>NPU</option>
+          <option value="kejadian" {% if filter_type=='kejadian' %}selected{% endif %}>Kejadian</option>
+        </select>
+      </div>
+      
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label for="filter_start_date">Dari Tanggal</label>
+        <input type="date" id="filter_start_date" name="start_date" class="form-control" value="{{ filter_start_date }}">
+      </div>
+
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label for="filter_end_date">Sampai Tanggal</label>
+        <input type="date" id="filter_end_date" name="end_date" class="form-control" value="{{ filter_end_date }}">
+      </div>
+
+      <div style="display:flex;gap:8px;padding-bottom:1px;">
+        <button type="submit" class="btn btn-primary btn-sm">🔍 Filter</button>
+        <a href="{{ url_for('txn.riwayat') }}" class="btn btn-ghost btn-sm">Reset</a>
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('txn.export_excel', type=filter_type, start_date=filter_start_date, end_date=filter_end_date, branch_id=filter_branch_id) }}" class="btn btn-success btn-sm">📥 Export Excel</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Transaction Table -->
+  <div class="table-wrapper">
+    <div class="table-header">
+      <h3>Total: {{ transactions|length }} transaksi</h3>
+    </div>
+    {% if transactions %}
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            {% if current_user.is_admin() %}<th>Cabang</th>{% endif %}
+            <th>Tanggal</th>
+            <th>Tipe</th>
+            <th>Divisi</th>
+            <th>Nama Bahan</th>
+            <th>Qty</th>
+            <th>Satuan</th>
+            <th>User</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for txn in transactions %}
+          <tr>
+            <td style="color:var(--text-muted);font-size:0.8rem;">{{ txn.id }}</td>
+            {% if current_user.is_admin() %}
+            <td style="font-weight:600;color:var(--accent-blue);">{{ txn.branch.name if txn.branch else '-' }}</td>
+            {% endif %}
+            <td>{% if txn.transaction_date %}{{ txn.transaction_date.strftime('%d/%m/%Y') }}{% else %}-{% endif %}</td>
+            <td><span class="badge badge-{{ txn.type }}">{{ txn.type }}</span></td>
+            <td>{{ txn.divisi }}</td>
+            <td style="color:var(--text-primary);font-weight:500;">{{ txn.nama_bahan }}</td>
+            <td style="font-weight:600;">{% if txn.type != 'kejadian' %}{{ txn.qty }}{% else %}-{% endif %}</td>
+            <td>{% if txn.type != 'kejadian' %}{{ txn.satuan }}{% else %}-{% endif %}</td>
+            <td>{{ txn.user.username }}</td>
+            <td>
+              <div style="display:flex;gap:4px;">
+                <a href="{{ url_for('txn.edit', txn_id=txn.id) }}" class="btn btn-ghost btn-sm" title="Edit">✏️</a>
+                <form method="POST" action="{{ url_for('txn.delete', txn_id=txn.id) }}" style="display:inline;"
+                      onsubmit="return confirm('Hapus transaksi ini?')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Hapus">🗑️</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">📭</div>
+      <p>Tidak ada transaksi ditemukan</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

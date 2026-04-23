@@ -1,0 +1,106 @@
+{% extends "dashboard.html" %}
+{% block title %}Edit Transaksi — StockIQ{% endblock %}
+{% block page_title %}✏️ Edit Transaksi{% endblock %}
+
+{% block content %}
+<div class="form-page fade-in">
+  <div class="form-card">
+    <h2>✏️ Edit Transaksi #{{ txn.id }}</h2>
+    <p class="form-subtitle">Tipe: {{ txn.type|upper }}</p>
+
+    <form method="POST" action="{{ url_for('txn.edit', txn_id=txn.id) }}">
+
+      <div class="form-group">
+        <label for="tanggal">Tanggal</label>
+        <input type="date" id="tanggal" name="tanggal" class="form-control" required
+               value="{{ txn.transaction_date.strftime('%Y-%m-%d') if txn.transaction_date else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="divisi">Divisi</label>
+        <input type="text" id="divisi" name="divisi" class="form-control" value="{{ txn.divisi }}" required>
+      </div>
+
+      {% if txn.type == 'kejadian' %}
+      <div class="form-group">
+        <label for="isi_kejadian">Isi Kejadian</label>
+        <textarea id="isi_kejadian" name="isi_kejadian" class="form-control" required rows="4">{{ detail.get('isi_kejadian', txn.nama_bahan) }}</textarea>
+      </div>
+      {% else %}
+      <div class="form-group">
+        <label for="nama_bahan">Nama Bahan</label>
+        <input type="text" id="nama_bahan" name="nama_bahan" class="form-control" value="{{ txn.nama_bahan }}" required>
+      </div>
+
+        {% if txn.type in ('prepare', 'prepare_in') %}
+        <div class="form-row">
+          <div class="form-group">
+            <label for="qty_prepare">Qty Prepare</label>
+            <input type="number" id="qty_prepare" name="qty_prepare" class="form-control" step="any"
+                   value="{{ detail.get('qty_prepare', 0) }}">
+          </div>
+          <div class="form-group">
+            <label for="satuan_prepare">Satuan Prepare</label>
+            <input type="text" id="satuan_prepare" name="satuan_prepare" class="form-control"
+                   value="{{ detail.get('satuan_prepare', '') }}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="qty_jadi">Qty Jadi</label>
+            <input type="number" id="qty_jadi" name="qty_jadi" class="form-control" step="any"
+                   value="{{ detail.get('qty_jadi', txn.qty) }}">
+          </div>
+          <div class="form-group">
+            <label for="satuan_bahan">Satuan Bahan</label>
+            <input type="text" id="satuan_bahan" name="satuan_bahan" class="form-control"
+                   value="{{ detail.get('satuan_bahan', txn.satuan) }}">
+          </div>
+        </div>
+        {% else %}
+        <div class="form-row">
+          <div class="form-group">
+            <label for="qty">Qty</label>
+            <input type="number" id="qty" name="qty" class="form-control" step="any"
+                   value="{{ txn.qty }}" required>
+          </div>
+          <div class="form-group">
+            <label for="satuan">Satuan</label>
+            <input type="text" id="satuan" name="satuan" class="form-control"
+                   value="{{ txn.satuan }}" required>
+          </div>
+        </div>
+        {% endif %}
+
+      {% if txn.type == 'masuk' %}
+      <div class="form-group">
+        <label for="asal_barang">Asal Barang</label>
+        <select id="asal_barang" name="asal_barang" class="form-control">
+          <option value="Pusat" {% if detail.get('asal_barang')=='Pusat' %}selected{% endif %}>Pusat</option>
+          <option value="Supplier Luar" {% if detail.get('asal_barang')=='Supplier Luar' %}selected{% endif %}>Supplier Luar</option>
+        </select>
+      </div>
+      {% endif %}
+
+      {% if txn.type == 'transfer' %}
+      <div class="form-group">
+        <label for="cabang_tujuan">Cabang Tujuan</label>
+        <input type="text" id="cabang_tujuan" name="cabang_tujuan" class="form-control"
+               value="{{ detail.get('cabang_tujuan', '') }}">
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="keterangan">Keterangan <span class="optional-label">(opsional)</span></label>
+        <textarea id="keterangan" name="keterangan" class="form-control">{{ detail.get('keterangan', '') }}</textarea>
+      </div>
+      {% endif %}
+
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+        <a href="{{ url_for('txn.riwayat') }}" class="btn btn-ghost">Batal</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

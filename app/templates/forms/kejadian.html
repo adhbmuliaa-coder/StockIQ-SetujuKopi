@@ -1,0 +1,42 @@
+{% extends "dashboard.html" %}
+{% block title %}Kejadian — StockIQ{% endblock %}
+{% block page_title %}📝 Kejadian{% endblock %}
+
+{% block content %}
+<div class="form-page fade-in">
+  <div class="form-card">
+    <h2>📝 Form Kejadian</h2>
+    <p class="form-subtitle">Catat kejadian / insiden di cabang</p>
+
+    <form method="POST" action="{{ url_for('kejadian.index') }}" class="validated-form"
+          data-no-items="true">
+
+      <div class="form-group">
+        <label for="tanggal">Tanggal</label>
+        <input type="date" id="tanggal" name="tanggal" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="divisi_kejadian">Divisi</label>
+        <select id="divisi_kejadian" name="divisi" class="form-control" required>
+          <option value="">-- Pilih Divisi --</option>
+          <option value="BAR">BAR</option>
+          <option value="DAPUR">DAPUR</option>
+          <option value="TENANT">TENANT</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="isi_kejadian">Isi Kejadian</label>
+        <textarea id="isi_kejadian" name="isi_kejadian" class="form-control" required
+                  placeholder="Jelaskan kejadian yang terjadi..." rows="4"></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary" id="submitKejadian">💾 Simpan</button>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-ghost">Batal</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

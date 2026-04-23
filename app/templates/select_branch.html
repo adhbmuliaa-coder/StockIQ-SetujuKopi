@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Pilih Cabang — StockIQ{% endblock %}
+
+{% block body %}
+<div class="login-wrapper">
+  <div style="width:100%;max-width:860px;padding:20px;">
+    <div style="text-align:center;margin-bottom:36px;" class="fade-in">
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Pilih Cabang</h1>
+      <p style="color:var(--text-muted);font-size:0.88rem;">
+        Selamat datang, <strong style="color:var(--accent-blue);">{{ current_user.username }}</strong>.
+        Pilih cabang untuk mulai bekerja.
+      </p>
+    </div>
+
+    {% if branches|length > 0 %}
+    <div class="branch-grid fade-in">
+      {% for branch in branches %}
+      <form method="POST" action="{{ url_for('auth.select_branch') }}" style="display:contents;">
+        <input type="hidden" name="branch_id" value="{{ branch.id }}">
+        <button type="submit" class="branch-card" id="branch-{{ branch.id }}">
+          <div class="icon">🏪</div>
+          <div class="name">{{ branch.name }}</div>
+        </button>
+      </form>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state fade-in">
+      <div class="icon">🔒</div>
+      <p>Anda belum memiliki akses ke cabang manapun.</p>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-top:8px;">Hubungi admin untuk mendapatkan akses cabang.</p>
+    </div>
+    {% endif %}
+
+    {% if current_user.is_admin() %}
+    <div style="text-align:center;margin-top:32px;" class="fade-in">
+      <a href="{{ url_for('admin.users') }}" class="btn btn-ghost">
+        ⚙️ Admin Panel
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
