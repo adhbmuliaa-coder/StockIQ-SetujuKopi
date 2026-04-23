@@ -28,4 +28,4 @@ RUN mkdir -p $HOME/app/instance
 EXPOSE 7860
 
 # Menjalankan aplikasi menggunakan Gunicorn
-CMD gunicorn --bind 0.0.0.0:7860 --workers 3 run:app
+CMD gunicorn --bind 0.0.0.0:7860 --workers 1 run:app
