@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 5000
 
 # Menjalankan aplikasi menggunakan Gunicorn untuk production
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "run:app"]
+CMD gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 3 run:app
